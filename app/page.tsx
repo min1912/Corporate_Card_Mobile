@@ -28,12 +28,30 @@ import { BatchEditScreen } from "@/components/card/batch-edit-screen"
 
 type ViewType = "list" | "detail" | "batchEdit" | "wbs" | "account" | "approval" | "cancelMatch"
 
+const formatDate = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+const getDefaultFilterDates = () => {
+  const today = new Date()
+  const lastMonthFirst = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  return {
+    dateFrom: formatDate(lastMonthFirst),
+    dateTo: formatDate(today),
+  }
+}
+
+const defaultFilterDates = getDefaultFilterDates()
+
 const initialFilter: FilterState = {
   status: "미처리",
   usageType: "전체",
   cardHolder: "전체",
-  dateFrom: "2026-04-01",
-  dateTo: "2026-04-30",
+  dateFrom: defaultFilterDates.dateFrom,
+  dateTo: defaultFilterDates.dateTo,
   accountName: "",
   searchQuery: "",
 }
