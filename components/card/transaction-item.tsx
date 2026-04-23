@@ -49,6 +49,7 @@ export const TransactionItem = memo(function TransactionItem({
         isSelected && "bg-blue-50",
         !isSelected && "active:bg-gray-50"
       )}
+      style={{ touchAction: "pan-y", WebkitUserSelect: "none" }}
     >
       <div className="flex items-start gap-3">
         {isSelectionMode && (
