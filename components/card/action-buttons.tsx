@@ -59,7 +59,7 @@ export const ActionButtons = memo(function ActionButtons({
 
       {/* More Menu */}
       {moreMenuOpen && (
-        <div className="absolute bottom-20 right-4 z-50 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden md:right-auto md:left-1/2 md:-translate-x-1/2 md:max-w-[344px] md:w-full">
+        <div className="absolute bottom-20 left-4 right-4 z-50 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden md:right-auto md:left-1/2 md:-translate-x-1/2 md:max-w-[344px] md:w-full">
           <button
             onClick={handleCancel}
             className="w-full px-4 py-3 text-center text-sm text-red-600 hover:bg-red-50 transition-colors border-b border-gray-100"
