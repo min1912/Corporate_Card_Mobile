@@ -170,6 +170,7 @@ export const ListScreen = memo(function ListScreen({
           overscrollBehavior: 'contain',
           transform: `translateY(${pullDistance}px)`,
           transition: isPulling ? 'none' : 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          touchAction: 'pan-y',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
