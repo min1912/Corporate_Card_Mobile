@@ -14,12 +14,10 @@ export function useLongPress({ onLongPress, onClick, delay = 500 }: UseLongPress
   const isScrollingRef = useRef(false)
   const startXRef = useRef(0)
   const startYRef = useRef(0)
-  const startTargetRef = useRef<HTMLElement | null>(null)
 
   const start = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     isLongPressRef.current = false
     isScrollingRef.current = false
-    startTargetRef.current = e.currentTarget as HTMLElement
 
     if ("touches" in e && e.touches.length > 0) {
       startXRef.current = e.touches[0].clientX
@@ -39,13 +37,10 @@ export function useLongPress({ onLongPress, onClick, delay = 500 }: UseLongPress
         timerRef.current = null
       }
 
-      const shouldTrigger =
-        shouldTriggerClick &&
-        !isLongPressRef.current &&
-        !isScrollingRef.current &&
-        onClick
-
-      if (shouldTrigger) {
+      if (shouldTriggerClick && !isLongPressRef.current && !isScrollingRef.current && onClick) {
+        if ("touches" in e || "changedTouches" in e) {
+          e.preventDefault()
+        }
         onClick()
       }
     },
@@ -58,14 +53,8 @@ export function useLongPress({ onLongPress, onClick, delay = 500 }: UseLongPress
     const touch = e.touches[0]
     const deltaX = Math.abs(touch.clientX - startXRef.current)
     const deltaY = Math.abs(touch.clientY - startYRef.current)
-    const currentTarget = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null
 
-    const isSameElement =
-      startTargetRef.current &&
-      currentTarget &&
-      (startTargetRef.current === currentTarget || startTargetRef.current.contains(currentTarget))
-
-    if (deltaX > 10 || deltaY > 10 || !isSameElement) {
+    if (deltaX > 10 || deltaY > 10) {
       isScrollingRef.current = true
       if (timerRef.current) {
         clearTimeout(timerRef.current)
