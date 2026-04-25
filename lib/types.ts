@@ -30,9 +30,9 @@ export interface CardTransaction {
 
 export type TransactionStatus = 
   | "미처리" 
-  | "결재진행" 
-  | "결재완료" 
-  | "회계승인" 
+  | "진행 중-현업" 
+  | "진행 중-회계" 
+  | "검토완료" 
   | "지급완료" 
   | "개인사용" 
   | "취소처리" 
@@ -61,7 +61,7 @@ export interface Approver {
   id: string
   name: string
   position: string
-  type: "승인" | "회계승인"
+  type: "승인" | "검토완료"
   order: number
 }
 

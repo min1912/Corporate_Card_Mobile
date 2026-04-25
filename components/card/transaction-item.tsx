@@ -11,6 +11,7 @@ interface TransactionItemProps {
   transaction: CardTransaction
   isSelected: boolean
   isSelectionMode: boolean
+  isExiting?: boolean
   onSelect: (id: string) => void
   onClick: (transaction: CardTransaction) => void
   onLongPress: (id: string) => void
@@ -20,6 +21,7 @@ export const TransactionItem = memo(function TransactionItem({
   transaction,
   isSelected,
   isSelectionMode,
+  isExiting = false,
   onSelect,
   onClick,
   onLongPress,
@@ -42,15 +44,23 @@ export const TransactionItem = memo(function TransactionItem({
 
   return (
     <div
-      {...longPressHandlers}
       className={cn(
-        "px-4 py-3 cursor-pointer transition-colors select-none",
-        transaction.status === "반려" && "border-l-4 border-l-red-400 bg-red-50/30",
-        isSelected && "bg-blue-50",
-        !isSelected && "active:bg-gray-50"
+        "grid transition-all duration-300 ease-in-out border-gray-100",
+        isExiting ? "opacity-0 border-transparent" : "opacity-100 border-b last:border-b-0"
       )}
-      style={{ touchAction: "pan-y", WebkitUserSelect: "none" }}
+      style={{ gridTemplateRows: isExiting ? "0fr" : "1fr" }}
     >
+      <div className="overflow-hidden min-h-0">
+        <div
+          {...longPressHandlers}
+          className={cn(
+            "px-4 py-3 cursor-pointer transition-colors select-none",
+            transaction.status === "반려" && "bg-red-50/50",
+            isSelected && "bg-blue-50",
+            !isSelected && "active:bg-gray-50"
+          )}
+          style={{ touchAction: "pan-y", WebkitUserSelect: "none" }}
+        >
       <div className="flex items-start gap-3">
         {isSelectionMode && (
           <div className="pt-1 flex-shrink-0">
@@ -65,27 +75,33 @@ export const TransactionItem = memo(function TransactionItem({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <StatusBadge status={transaction.status} />
+          {/* 상단: 사용처와 금액 */}
+          <div className="flex items-start justify-between mb-1.5 gap-3">
+            <p className="text-base font-bold text-gray-900 line-clamp-2 break-keep">
+              {transaction.merchant}
+            </p>
             <span
               className={cn(
-                "text-lg font-bold",
+                "text-lg font-bold flex-shrink-0 whitespace-nowrap leading-tight",
                 transaction.amount < 0 ? "text-red-600" : "text-gray-900"
               )}
             >
               {formatAmount(transaction.amount)}원
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1 mr-2">
-              <p className="text-sm font-medium text-gray-800 truncate">
-                {transaction.merchant}
-              </p>
-              <p className="text-xs text-gray-500">{transaction.businessType}</p>
+          {/* 하단: 상태 뱃지, 업종, 날짜/시간 */}
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-2 min-w-0 mr-2">
+              <StatusBadge status={transaction.status} />
+              <span className="text-sm font-medium text-gray-700 truncate">{transaction.businessType}</span>
             </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-xs text-gray-500">{transaction.date}</p>
-              <p className="text-xs text-gray-400">{transaction.time}</p>
+          <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex-shrink-0">
+            {transaction.isCancelled && (
+              <span className="text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md font-medium">
+                결제취소
+              </span>
+            )}
+            <span>{transaction.time}</span>
             </div>
           </div>
           {transaction.status === "반려" && transaction.rejectReason && (
@@ -95,12 +111,9 @@ export const TransactionItem = memo(function TransactionItem({
               </p>
             </div>
           )}
-          {transaction.isCancelled && (
-            <span className="inline-block mt-1 text-xs text-red-500 font-medium">
-              결제취소건
-            </span>
-          )}
         </div>
+      </div>
+    </div>
       </div>
     </div>
   )

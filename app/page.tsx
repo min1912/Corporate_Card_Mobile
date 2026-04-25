@@ -125,11 +125,17 @@ export default function CorporateCardMobile() {
     return transactions.filter((t) => {
       // Status filter
       if (filter.status !== "전체") {
-        const statusMatch =
-          filter.status === "미처리"
-            ? ["미처리", "반려"].includes(t.status)
-            : t.status === filter.status
-        if (!statusMatch) return false
+          let statusMatch = false
+          if (filter.status === "미처리") {
+            statusMatch = ["미처리", "반려"].includes(t.status)
+          } else if (filter.status === "진행 중") {
+            statusMatch = ["진행 중-현업", "진행 중-회계"].includes(t.status)
+          } else if (filter.status === "완료") {
+            statusMatch = ["검토완료", "지급완료"].includes(t.status)
+          } else {
+            statusMatch = t.status === filter.status
+          }
+          if (!statusMatch) return false
       }
 
       // Usage type filter
@@ -302,6 +308,28 @@ export default function CorporateCardMobile() {
     cancelSelection()
   }, [transactions, selectedItems, showToast, cancelSelection])
 
+  const returnToListWithAnimation = useCallback(() => {
+    if (view === "list") return;
+
+    setIsPageLeaving(true)
+    // 오버레이가 닫힐 때 하단의 상세화면이 부드럽게 빠져나가도록 상태를 먼저 전환
+    if (["approval", "cancelMatch", "wbs", "account"].includes(view)) {
+      setView(returnView)
+    }
+
+    if (transitionTimeoutRef.current) {
+      window.clearTimeout(transitionTimeoutRef.current)
+    }
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      setIsPageLeaving(false)
+      setDragOffset(0)
+      setDragStartX(null)
+      setView("list")
+      setSelectedTransaction(null)
+      setApprovalMode(null)
+    }, 260)
+  }, [view, returnView])
+
   const handleBatchSubmit = useCallback(() => {
     const selected = transactions.filter((t) => selectedItems.includes(t.id))
     if (selected.length === 0) {
@@ -314,7 +342,7 @@ export default function CorporateCardMobile() {
         selectedItems.includes(t.id)
           ? {
               ...t,
-              status: "결재진행" as const,
+              status: "진행 중-현업" as const,
             }
           : t
       )
@@ -391,7 +419,7 @@ export default function CorporateCardMobile() {
     )
     showToast("임시저장되었습니다")
     cancelSelection()
-    setView("list")
+    returnToListWithAnimation()
   }, [form, selectedItems, showToast, cancelSelection])
 
   const handleBatchEditSubmit = useCallback(() => {
@@ -456,7 +484,7 @@ export default function CorporateCardMobile() {
             selectedItems.includes(t.id)
               ? {
                   ...t,
-                  status: "결재진행" as const,
+                  status: "진행 중-현업" as const,
                   wbsCode: form.wbsCode,
                   wbsName: form.wbsName,
                   accountCode: form.accountCode,
@@ -473,16 +501,15 @@ export default function CorporateCardMobile() {
         )
         setApprovers(finalApprovers)
         showToast("상신되었습니다")
-        setView("list")
         cancelSelection()
-        setApprovalMode(null)
+        returnToListWithAnimation()
       } else if (selectedTransaction) {
         setTransactions((prev) =>
           prev.map((t) =>
             t.id === selectedTransaction.id
               ? {
                   ...t,
-                  status: "결재진행" as const,
+                  status: "진행 중-현업" as const,
                   wbsCode: form.wbsCode,
                   wbsName: form.wbsName,
                   accountCode: form.accountCode,
@@ -499,12 +526,10 @@ export default function CorporateCardMobile() {
         )
         setApprovers(finalApprovers)
         showToast("상신되었습니다")
-        setView("list")
-        setSelectedTransaction(null)
-        setApprovalMode(null)
+        returnToListWithAnimation()
       }
     },
-    [approvalMode, selectedItems, selectedTransaction, form, showToast, cancelSelection]
+    [approvalMode, selectedItems, selectedTransaction, form, showToast, cancelSelection, returnToListWithAnimation]
   )
 
   const handleSaveDraft = useCallback(() => {
@@ -529,10 +554,9 @@ export default function CorporateCardMobile() {
         )
       )
       showToast("임시저장되었습니다")
-      setView("list")
-      setSelectedTransaction(null)
+      returnToListWithAnimation()
     }
-  }, [selectedTransaction, form, showToast])
+  }, [selectedTransaction, form, showToast, returnToListWithAnimation])
 
   const handlePersonalUse = useCallback(() => {
     if (selectedTransaction) {
@@ -542,14 +566,14 @@ export default function CorporateCardMobile() {
         )
       )
       showToast("개인사용 처리되었습니다")
-      setView("list")
-      setSelectedTransaction(null)
+      returnToListWithAnimation()
     }
-  }, [selectedTransaction, showToast])
+  }, [selectedTransaction, showToast, returnToListWithAnimation])
 
   const handleCancelTransaction = useCallback(() => {
     // 상세화면에서 취소처리 시 매칭 화면 표시
     if (matchingTransactionsForCancel.length > 0) {
+      setReturnView("detail")
       setView("cancelMatch")
     } else {
       // 매칭 건이 없으면 바로 취소 (단, 금액이 0이어야 함)
@@ -564,11 +588,10 @@ export default function CorporateCardMobile() {
           )
         )
         showToast("취소처리되었습니다")
-        setView("list")
-        setSelectedTransaction(null)
+        returnToListWithAnimation()
       }
     }
-  }, [selectedTransaction, matchingTransactionsForCancel, showToast])
+  }, [selectedTransaction, matchingTransactionsForCancel, showToast, returnToListWithAnimation])
 
   const confirmCancelMatch = useCallback(
     (selectedIds: string[]) => {
@@ -578,10 +601,9 @@ export default function CorporateCardMobile() {
         )
       )
       showToast("취소처리되었습니다")
-      setView("list")
-      setSelectedTransaction(null)
+      returnToListWithAnimation()
     },
-    [showToast]
+    [showToast, returnToListWithAnimation]
   )
 
   const handleWbsSelect = useCallback(
@@ -618,13 +640,16 @@ export default function CorporateCardMobile() {
     if (view === "detail" || view === "batchEdit") {
       setIsPageLeaving(false)
       // WBS/계정 검색 모달에서 돌아오는 경우 애니메이션 없이 바로 표시
-      if (prevViewRef.current === "wbs" || prevViewRef.current === "account") {
+      if (["wbs", "account", "approval", "cancelMatch"].includes(prevViewRef.current)) {
         setSkipTransition(true)
         setOverlayVisible(true)
         requestAnimationFrame(() => setSkipTransition(false))
       } else {
         requestAnimationFrame(() => setOverlayVisible(true))
       }
+      } else if (["wbs", "account", "approval", "cancelMatch"].includes(view)) {
+        // 모달이 열릴 때 뒷 배경(상세화면 등)이 사라지지 않도록 오버레이 유지
+        setOverlayVisible(true)
     } else {
       setOverlayVisible(false)
     }
@@ -706,76 +731,30 @@ export default function CorporateCardMobile() {
 
   // Render content based on view
   const renderContent = () => {
-    // WBS Search Modal
-    if (view === "wbs") {
-      return (
-        <SearchModal
-          type="wbs"
-          options={wbsOptions}
-          originRect={searchOrigin}
-          onSelect={handleWbsSelect}
-          onClose={handleBack}
-        />
-      )
-    }
+    const baseView = (["wbs", "account", "approval", "cancelMatch"].includes(view)) ? returnView : view
 
-    // Account Search Modal
-    if (view === "account") {
-      return (
-        <SearchModal
-          type="account"
-          options={accountOptions}
-          originRect={searchOrigin}
-          onSelect={handleAccountSelect}
-          onClose={handleBack}
+    // 공통 ListScreen 렌더링 (상태 유지를 위해 항상 동일한 구조 내부에 렌더링)
+    const baseContent = (
+      <div className="relative h-full">
+        <ListScreen
+          filter={filter}
+          onFilterChange={handleFilterChange}
+          isFilterActive={isFilterActive}
+          filteredTransactions={filteredTransactions}
+          selectedItems={selectedItems}
+          isSelectionMode={isSelectionMode}
+          onSelect={handleSelect}
+          onClick={handleTransactionClick}
+          onLongPress={handleLongPress}
+          onCancelSelection={cancelSelection}
+          onBatchCancel={handleBatchCancel}
+          onBatchEdit={handleBatchEdit}
+          onBatchSubmit={handleBatchSubmit}
+          onBatchPersonalUse={handleBatchPersonalUse}
+          onFilterAccountSelect={handleFilterAccountSelect}
         />
-      )
-    }
-
-    // Approval Modal
-    if (view === "approval") {
-      return (
-        <ApprovalModal
-          approvers={approvers}
-          onConfirm={confirmSubmit}
-          onClose={handleBack}
-        />
-      )
-    }
-
-    // Cancel Match Modal
-    if (view === "cancelMatch" && selectedTransaction) {
-      return (
-        <CancelMatchModal
-          currentTransaction={selectedTransaction}
-          matchingTransactions={matchingTransactionsForCancel}
-          onConfirm={confirmCancelMatch}
-          onClose={handleBack}
-        />
-      )
-    }
-
-    // Detail View
-    if (view === "detail" && selectedTransaction) {
-      return (
-        <div className="relative h-full">
-          <ListScreen
-            filter={filter}
-            onFilterChange={handleFilterChange}
-            isFilterActive={isFilterActive}
-            filteredTransactions={filteredTransactions}
-            selectedItems={selectedItems}
-            isSelectionMode={isSelectionMode}
-            onSelect={handleSelect}
-            onClick={handleTransactionClick}
-            onLongPress={handleLongPress}
-            onCancelSelection={cancelSelection}
-            onBatchCancel={handleBatchCancel}
-            onBatchEdit={handleBatchEdit}
-            onBatchSubmit={handleBatchSubmit}
-            onBatchPersonalUse={handleBatchPersonalUse}
-            onFilterAccountSelect={handleFilterAccountSelect}
-          />
+        
+        {baseView === "detail" && selectedTransaction && (
           <div
             className="absolute inset-0 z-30 bg-white shadow-xl"
             style={{
@@ -815,31 +794,9 @@ export default function CorporateCardMobile() {
               onCancel={handleCancelTransaction}
             />
           </div>
-        </div>
-      )
-    }
+        )}
 
-    if (view === "batchEdit") {
-      const selectedTransactions = transactions.filter((t) => selectedItems.includes(t.id))
-      return (
-        <div className="relative h-full">
-          <ListScreen
-            filter={filter}
-            onFilterChange={handleFilterChange}
-            isFilterActive={isFilterActive}
-            filteredTransactions={filteredTransactions}
-            selectedItems={selectedItems}
-            isSelectionMode={isSelectionMode}
-            onSelect={handleSelect}
-            onClick={handleTransactionClick}
-            onLongPress={handleLongPress}
-            onCancelSelection={cancelSelection}
-            onBatchCancel={handleBatchCancel}
-            onBatchEdit={handleBatchEdit}
-            onBatchSubmit={handleBatchSubmit}
-            onBatchPersonalUse={handleBatchPersonalUse}
-            onFilterAccountSelect={handleFilterAccountSelect}
-          />
+        {baseView === "batchEdit" && (
           <div
             className="absolute inset-0 z-30 bg-white shadow-xl"
             style={{
@@ -856,7 +813,7 @@ export default function CorporateCardMobile() {
               onPointerUp={handlePointerUp}
             />
             <BatchEditScreen
-              selectedTransactions={selectedTransactions}
+              selectedTransactions={transactions.filter((t) => selectedItems.includes(t.id))}
               form={form}
               isEditable={true}
               onBack={handleBack}
@@ -879,29 +836,51 @@ export default function CorporateCardMobile() {
               onCancel={cancelSelection}
             />
           </div>
-        </div>
-      )
-    }
+        )}
+      </div>
+    )
 
-    // List View (default)
     return (
-      <ListScreen
-        filter={filter}
-        onFilterChange={handleFilterChange}
-        isFilterActive={isFilterActive}
-        filteredTransactions={filteredTransactions}
-        selectedItems={selectedItems}
-        isSelectionMode={isSelectionMode}
-        onSelect={handleSelect}
-        onClick={handleTransactionClick}
-        onLongPress={handleLongPress}
-        onCancelSelection={cancelSelection}
-        onBatchCancel={handleBatchCancel}
-        onBatchEdit={handleBatchEdit}
-        onBatchSubmit={handleBatchSubmit}
-        onBatchPersonalUse={handleBatchPersonalUse}
-        onFilterAccountSelect={handleFilterAccountSelect}
-      />
+      <>
+        {baseContent}
+        {view === "wbs" && (
+          <SearchModal
+            type="wbs"
+            options={wbsOptions}
+            originRect={searchOrigin}
+            onSelect={handleWbsSelect}
+            onClose={handleBack}
+          />
+        )}
+        {view === "account" && (
+          <SearchModal
+            type="account"
+            options={accountOptions}
+            originRect={searchOrigin}
+            onSelect={handleAccountSelect}
+            onClose={handleBack}
+          />
+        )}
+        {view === "approval" && (
+          <div className="absolute inset-0 z-50 overflow-hidden">
+            <ApprovalModal
+              approvers={approvers}
+              onConfirm={confirmSubmit}
+              onClose={handleBack}
+            />
+          </div>
+        )}
+        {view === "cancelMatch" && selectedTransaction && (
+          <div className="absolute inset-0 z-50 overflow-hidden">
+            <CancelMatchModal
+              currentTransaction={selectedTransaction}
+              matchingTransactions={matchingTransactionsForCancel}
+              onConfirm={confirmCancelMatch}
+              onClose={handleBack}
+            />
+          </div>
+        )}
+      </>
     )
   }
 

@@ -113,7 +113,7 @@ export const mockTransactions: CardTransaction[] = [
   // 결재진행
   {
     id: "6",
-    status: "결재진행",
+    status: "진행 중-현업",
     amount: 45000,
     merchant: "GS25 역삼점",
     businessType: "편의점",
@@ -137,7 +137,7 @@ export const mockTransactions: CardTransaction[] = [
   // 결재완료
   {
     id: "7",
-    status: "결재완료",
+    status: "진행 중-회계",
     amount: 180000,
     merchant: "쿠팡",
     businessType: "온라인쇼핑",
@@ -161,7 +161,7 @@ export const mockTransactions: CardTransaction[] = [
   // 회계승인
   {
     id: "8",
-    status: "회계승인",
+    status: "검토완료",
     amount: 67000,
     merchant: "배달의민족",
     businessType: "음식점",
@@ -304,7 +304,7 @@ export const mockTransactions: CardTransaction[] = [
   // 결재진행 - 사용자B
   {
     id: "15",
-    status: "결재진행",
+    status: "진행 중-현업",
     amount: 78000,
     merchant: "CGV 용산아이파크몰",
     businessType: "문화/레저",
@@ -325,18 +325,34 @@ export const mockTransactions: CardTransaction[] = [
     accountName: "회의비",
     usageDescription: "고객사 미팅 후 문화활동",
   },
+  // 미처리 - 긴 가맹점명 및 큰 금액 테스트
+  {
+    id: "16",
+    status: "미처리",
+    amount: 1540000,
+    merchant: "주식회사 엄청나게긴가맹점명테스트 1호점",
+    businessType: "일반음식점",
+    date: "2026-04-12",
+    time: "19:30",
+    approvalNumber: "41234567",
+    cardNumber: "1234",
+    cardHolder: "사용자A",
+    supplyAmount: 1400000,
+    vatAmount: 140000,
+    managementNumber: "XP20260145140",
+    postingDate: "2026-04-13",
+    isCancelled: false,
+    usageType: "국내",
+  },
 ]
 
 export const statusOptions = [
   "전체", 
   "미처리", 
-  "결재진행", 
-  "결재완료", 
-  "회계승인", 
-  "지급완료", 
-  "개인사용", 
+  "진행 중",
+  "완료",
   "취소처리",
-  "반려"
+  "개인사용"
 ]
 
 export const usageTypeOptions = ["전체", "국내", "해외"]
@@ -366,15 +382,14 @@ export const wbsOptions: WbsOption[] = [
 export const defaultApprovers: Approver[] = [
   { id: "1", name: "김팀장", position: "팀장", type: "승인", order: 1 },
   { id: "2", name: "이부장", position: "부장", type: "승인", order: 2 },
-  { id: "3", name: "박회계", position: "회계담당", type: "회계승인", order: 3 },
+  { id: "3", name: "박회계", position: "회계담당", type: "검토완료", order: 3 },
 ]
 
 export const allUsers: Omit<Approver, "order">[] = [
-  { id: "1", name: "김팀장", position: "팀장", type: "승인" },
   { id: "2", name: "이부장", position: "부장", type: "승인" },
-  { id: "3", name: "박회계", position: "회계담당", type: "회계승인" },
+  { id: "3", name: "박회계", position: "회계담당", type: "검토완료" },
   { id: "4", name: "최과장", position: "과장", type: "승인" },
   { id: "5", name: "정대리", position: "대리", type: "승인" },
   { id: "6", name: "한사원", position: "사원", type: "승인" },
-  { id: "7", name: "강회계", position: "회계팀장", type: "회계승인" },
+  { id: "7", name: "강회계", position: "회계팀장", type: "검토완료" },
 ]

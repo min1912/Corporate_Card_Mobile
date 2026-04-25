@@ -26,11 +26,13 @@ export const DetailForm = memo(function DetailForm({
   onCopy,
 }: DetailFormProps) {
   const [localUsageDescription, setLocalUsageDescription] = useState(form.usageDescription)
+  const [localVehicleNumber, setLocalVehicleNumber] = useState(form.vehicleNumber)
 
   // form이 변경되면 로컬 상태도 동기화
   useEffect(() => {
     setLocalUsageDescription(form.usageDescription)
-  }, [form.usageDescription])
+    setLocalVehicleNumber(form.vehicleNumber)
+  }, [form.usageDescription, form.vehicleNumber])
 
   const updateForm = useCallback(
     (key: keyof FormState, value: unknown) => {
@@ -52,6 +54,12 @@ export const DetailForm = memo(function DetailForm({
       updateForm("usageDescription", localUsageDescription)
     }
   }, [localUsageDescription, form.usageDescription, updateForm])
+
+  const handleVehicleNumberBlur = useCallback(() => {
+    if (localVehicleNumber !== form.vehicleNumber) {
+      updateForm("vehicleNumber", localVehicleNumber)
+    }
+  }, [localVehicleNumber, form.vehicleNumber, updateForm])
 
   const handleAddAttachment = useCallback(() => {
     const newFile: AttachmentFile = {
@@ -259,8 +267,9 @@ export const DetailForm = memo(function DetailForm({
             </label>
             <input
               type="text"
-              value={form.vehicleNumber}
-              onChange={(e) => updateForm("vehicleNumber", e.target.value)}
+              value={localVehicleNumber}
+              onChange={(e) => setLocalVehicleNumber(e.target.value)}
+              onBlur={handleVehicleNumberBlur}
               disabled={!isEditable}
               placeholder="예: 12가 3456"
               className={cn(

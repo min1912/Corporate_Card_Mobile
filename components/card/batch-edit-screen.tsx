@@ -65,11 +65,11 @@ export const BatchEditScreen = memo(function BatchEditScreen({
               {selectedTransactions.map((transaction) => (
                 <div key={transaction.id} className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-900 truncate">{transaction.merchant}</p>
+                    <p className="text-sm font-medium text-gray-800 truncate">{transaction.merchant}</p>
                     <p className="text-xs text-gray-500">{transaction.businessType}</p>
                   </div>
                   <p className={cn(
-                    "text-sm font-semibold",
+                    "text-sm font-bold",
                     transaction.amount < 0 ? "text-red-600" : "text-gray-900"
                   )}>
                     {transaction.amount.toLocaleString()}원

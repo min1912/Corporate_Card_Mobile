@@ -78,18 +78,11 @@ export const SearchModal = memo(function SearchModal({
   const placeholder =
     type === "wbs" ? "WBS코드 또는 프로젝트명 검색" : "계정코드 또는 계정명 검색"
 
-  const originX = originRect ? originRect.left - 16 : 0
-  const originY = originRect ? originRect.top - 16 : 0
-
   const searchBoxStyle = {
-    width: expanded ? "calc(100% - 32px)" : originRect ? `${originRect.width}px` : "calc(100% - 32px)",
-    left: expanded ? 0 : `${originX}px`,
-    position: "relative" as const,
-    transform: expanded ? "translateY(0) scale(1)" : `translateY(${originY}px) scale(0.92)`,
-    transformOrigin: "top left",
-    transition:
-      "width 240ms cubic-bezier(0.4, 0, 0.2, 1), left 240ms cubic-bezier(0.4, 0, 0.2, 1), transform 240ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms cubic-bezier(0.4, 0, 0.2, 1)",
-    opacity: expanded ? 1 : 0.88,
+    transform: expanded ? "translateY(0) scale(1)" : "translateY(16px) scale(0.95)",
+    transformOrigin: "center",
+    transition: "transform 240ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms cubic-bezier(0.4, 0, 0.2, 1)",
+    opacity: expanded ? 1 : 0,
   } as const
 
   const resultsStyle = {
@@ -110,7 +103,7 @@ export const SearchModal = memo(function SearchModal({
       <div className="absolute inset-x-0 top-0 px-4 pt-4 h-full z-40 pointer-events-none">
         <div
           style={searchBoxStyle}
-          className="mx-auto w-full max-w-[840px] rounded-[20px] bg-white shadow-xl ring-1 ring-black/5 overflow-hidden h-full flex flex-col pointer-events-auto"
+          className="mx-auto w-full max-w-[360px] rounded-[20px] bg-white shadow-xl ring-1 ring-black/5 overflow-hidden h-full flex flex-col pointer-events-auto"
         >
           <div className="flex items-center px-4 py-3">
             <button onClick={handleClose} className="p-1 -ml-1" aria-label="뒤로가기">

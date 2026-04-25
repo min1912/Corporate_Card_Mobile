@@ -58,28 +58,30 @@ export const DetailScreen = memo(function DetailScreen({
         )}
 
         <div className="m-4 p-4 bg-white rounded-xl shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">{selectedTransaction.merchant}</h2>
+          <div className="flex items-start justify-between mb-3 gap-3">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-bold text-gray-900 break-keep">{selectedTransaction.merchant}</h2>
               <p className="text-sm text-gray-500">{selectedTransaction.businessType}</p>
             </div>
-            <StatusBadge status={selectedTransaction.status} />
+            <div className="flex-shrink-0">
+              <StatusBadge status={selectedTransaction.status} />
+            </div>
           </div>
-          <div className="flex items-end justify-between">
-            <div>
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <p
                 className={cn(
-                  "text-2xl font-bold",
+                  "text-2xl font-bold truncate",
                   selectedTransaction.amount < 0 ? "text-red-600" : "text-gray-900"
                 )}
               >
                 {selectedTransaction.amount.toLocaleString()}원
               </p>
               {selectedTransaction.isCancelled && (
-                <span className="text-xs text-red-500 font-medium">결제취소</span>
+                <span className="inline-block mt-1 text-[11px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-md font-medium">결제취소</span>
               )}
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 flex-shrink-0">
               {selectedTransaction.date} {selectedTransaction.time}
             </p>
           </div>
@@ -100,8 +102,7 @@ export const DetailScreen = memo(function DetailScreen({
           supplyAmount={form.supplyAmount}
           vatAmount={form.vatAmount}
           isEditable={isEditable}
-          onSupplyAmountChange={(value) => onFormChange({ ...form, supplyAmount: value })}
-          onVatAmountChange={(value) => onFormChange({ ...form, vatAmount: value })}
+        onAmountsChange={(supply, vat) => onFormChange({ ...form, supplyAmount: supply, vatAmount: vat })}
           onCopy={onCopy}
         />
       </div>

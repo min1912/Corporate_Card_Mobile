@@ -92,6 +92,7 @@ export const SearchModal = memo(function SearchModal({
   onClose,
 }: SearchModalProps) {
   const [localSearchQuery, setLocalSearchQuery] = useState(filter.searchQuery)
+  const [isVisible, setIsVisible] = useState(false)
 
   const debouncedSearchUpdate = useDebouncedCallback(
     (value: string) => {
@@ -101,10 +102,16 @@ export const SearchModal = memo(function SearchModal({
   )
 
   useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true))
     if (filter.searchQuery !== localSearchQuery) {
       setLocalSearchQuery(filter.searchQuery)
     }
   }, [filter.searchQuery])
+
+  const handleClose = useCallback(() => {
+    setIsVisible(false)
+    setTimeout(onClose, 200) // 애니메이션 시간(200ms) 이후 완전히 언마운트
+  }, [onClose])
 
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -122,12 +129,21 @@ export const SearchModal = memo(function SearchModal({
   return (
     <>
       {/* Backdrop */}
-      <div className="absolute inset-0 z-40 bg-black/20 modal-backdrop-enter" onClick={onClose} />
+      <div 
+        className={cn(
+          "absolute inset-0 z-40 bg-black/20 transition-opacity duration-200 ease-in-out",
+          isVisible ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={handleClose} 
+      />
 
       {/* Modal */}
-      <div className="absolute top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 search-modal-enter">
+      <div className={cn(
+        "absolute top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 transition-all duration-200 ease-in-out",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+      )}>
         <div className="flex items-center px-4 py-3">
-          <button onClick={onClose} className="p-1 -ml-1" aria-label="뒤로가기">
+          <button onClick={handleClose} className="p-1 -ml-1" aria-label="뒤로가기">
             <X className="w-6 h-6 text-gray-600" />
           </button>
           <h1 className="ml-2 text-lg font-semibold text-gray-900">검색</h1>
@@ -189,6 +205,17 @@ export const FilterBottomSheet = memo(function FilterBottomSheet({
   onClose,
   onAccountSelect,
 }: FilterBottomSheetProps) {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true))
+  }, [])
+
+  const handleClose = useCallback(() => {
+    setIsVisible(false)
+    setTimeout(onClose, 300) // 바텀 시트 애니메이션 시간(300ms) 대기
+  }, [onClose])
+
   const handleFilterReset = useCallback(() => {
     const defaultDates = getDefaultFilterDates()
     onFilterChange(() => ({
@@ -212,14 +239,23 @@ export const FilterBottomSheet = memo(function FilterBottomSheet({
   return (
     <>
       {/* Backdrop */}
-      <div className="absolute inset-0 z-40 bg-black/20 modal-backdrop-enter" onClick={onClose} />
+      <div 
+        className={cn(
+          "absolute inset-0 z-40 bg-black/20 transition-opacity duration-300 ease-in-out",
+          isVisible ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={handleClose} 
+      />
 
       {/* Bottom Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-lg max-h-[80vh] overflow-y-auto filter-sheet-enter">
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-lg max-h-[80vh] overflow-y-auto transition-transform duration-300 ease-out",
+        isVisible ? "translate-y-0" : "translate-y-full"
+      )}>
         <div className="sticky top-0 bg-white border-b border-gray-100 rounded-t-2xl">
           <div className="flex items-center justify-between px-4 py-3">
             <h1 className="text-lg font-semibold text-gray-900">필터</h1>
-            <button onClick={onClose} className="p-1" aria-label="닫기">
+            <button onClick={handleClose} className="p-1" aria-label="닫기">
               <X className="w-6 h-6 text-gray-600" />
             </button>
           </div>
@@ -311,7 +347,7 @@ export const FilterBottomSheet = memo(function FilterBottomSheet({
               초기화
             </button>
             <button
-              onClick={onClose}
+            onClick={handleClose}
               className="flex-1 py-3 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
             >
               적용
