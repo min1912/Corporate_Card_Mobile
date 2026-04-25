@@ -1,7 +1,7 @@
 "use client"
 
 import { memo } from "react"
-import { Check } from "lucide-react"
+import { Check, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StatusBadge } from "./status-badge"
 import { useLongPress } from "@/hooks/use-long-press"
@@ -94,6 +94,9 @@ export const TransactionItem = memo(function TransactionItem({
             <div className="flex items-center gap-2 min-w-0 mr-2">
               <StatusBadge status={transaction.status} />
               <span className="text-sm font-medium text-gray-700 truncate">{transaction.businessType}</span>
+              {transaction.businessType === "통신판매업" && (
+                <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+              )}
             </div>
           <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex-shrink-0">
             {transaction.isCancelled && (

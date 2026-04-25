@@ -344,6 +344,25 @@ export const mockTransactions: CardTransaction[] = [
     isCancelled: false,
     usageType: "국내",
   },
+  // 미처리 - 통신판매업 테스트
+  {
+    id: "17",
+    status: "미처리",
+    amount: 34500,
+    merchant: "네이버페이",
+    businessType: "통신판매업",
+    date: "2026-04-10",
+    time: "10:15",
+    approvalNumber: "51234567",
+    cardNumber: "1234",
+    cardHolder: "사용자A",
+    supplyAmount: 31364,
+    vatAmount: 3136,
+    managementNumber: "XP20260145141",
+    postingDate: "2026-04-11",
+    isCancelled: false,
+    usageType: "국내",
+  },
 ]
 
 export const statusOptions = [

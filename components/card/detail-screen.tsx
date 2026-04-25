@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, type MouseEvent } from "react"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { CardTransaction, FormState } from "@/lib/types"
 import { StatusBadge } from "./status-badge"
@@ -54,6 +54,13 @@ export const DetailScreen = memo(function DetailScreen({
           <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm font-semibold text-red-700 mb-1">반려 사유</p>
             <p className="text-sm text-red-600">{selectedTransaction.rejectReason}</p>
+          </div>
+        )}
+
+        {selectedTransaction.businessType === "통신판매업" && (
+          <div className="mx-4 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-amber-800 leading-snug break-keep">가맹점 조회가 불가능할 경우, 영수증을 첨부하거나 실사용처를 입력바랍니다.</p>
           </div>
         )}
 

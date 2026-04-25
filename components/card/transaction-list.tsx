@@ -125,7 +125,7 @@ export const TransactionList = memo(function TransactionList({
               {/* 평소엔 sticky가 작동하도록 overflow-hidden을 애니메이션 중에만 적용합니다 */}
               <div className={cn("min-h-0", isAllExiting ? "overflow-hidden" : "")}>
                 <div className="sticky top-0 z-10 flex items-center px-4 py-2 bg-white/95 backdrop-blur-sm">
-                  <span className="text-xs font-bold text-gray-700 mr-3">{formatSectionDate(date)}</span>
+                  <span className="text-xs font-medium text-gray-500 mr-3">{formatSectionDate(date)}</span>
                   <div className="flex-1 h-px bg-gray-100"></div>
                 </div>
               </div>

@@ -481,6 +481,15 @@ export default function CorporateCardMobile() {
 
   const confirmSubmit = useCallback(
     (finalApprovers: Approver[]) => {
+      let budgetMsg = ""
+      if (["회의비", "복리후생비-업무추진식대", "시내교통비"].includes(form.accountName) && form.wbsCode) {
+        const hash = (form.wbsCode + form.accountName).split("").reduce((a, b) => a + b.charCodeAt(0), 0)
+        const total = ((hash % 10) + 3) * 1000000
+        const used = ((hash % 7) + 1) * 350000
+        const remaining = total - used
+        budgetMsg = ` (잔여예산: ${remaining.toLocaleString()}원)`
+      }
+
       if (approvalMode === "batch") {
         if (selectedItems.length === 0) {
           showToast("선택된 건이 없습니다", "error")
@@ -510,7 +519,7 @@ export default function CorporateCardMobile() {
           )
         )
         setApprovers(finalApprovers)
-        showToast("상신되었습니다")
+        showToast(`상신되었습니다${budgetMsg}`)
         cancelSelection()
         returnToListWithAnimation()
       } else if (selectedTransaction) {
@@ -535,7 +544,7 @@ export default function CorporateCardMobile() {
           )
         )
         setApprovers(finalApprovers)
-        showToast("상신되었습니다")
+        showToast(`상신되었습니다${budgetMsg}`)
         returnToListWithAnimation()
       }
     },

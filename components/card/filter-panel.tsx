@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, useState, useCallback, useEffect, type MouseEvent } from "react"
-import { Search, Filter, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, Filter, X, ChevronDown, ChevronUp, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useDebouncedCallback } from "@/hooks/use-debounce"
 import { statusOptions, usageTypeOptions, cardHolderOptions } from "@/lib/mock-data"
@@ -18,6 +18,7 @@ interface FilterPanelProps {
   totalCount?: number
   onSelectAll?: () => void
   onCancelSelection?: () => void
+  onBudgetOpen?: () => void
 }
 
 export const FilterPanel = memo(function FilterPanel({
@@ -31,6 +32,7 @@ export const FilterPanel = memo(function FilterPanel({
   totalCount = 0,
   onSelectAll,
   onCancelSelection,
+  onBudgetOpen,
 }: FilterPanelProps) {
   return (
     <div className={cn("sticky top-0 z-10 border-b border-gray-100 transition-colors", isSelectionMode ? "bg-blue-50/95 backdrop-blur-sm" : "bg-white")}>
@@ -54,6 +56,15 @@ export const FilterPanel = memo(function FilterPanel({
         <div className="flex items-center justify-between px-4 py-3 h-[52px]">
           <h1 className="text-lg font-semibold text-gray-900">법인카드 내역</h1>
           <div className="flex items-center gap-1">
+            {onBudgetOpen && (
+              <button
+                onClick={onBudgetOpen}
+                className="p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="예산 조회"
+              >
+                <Wallet className="w-5 h-5" />
+              </button>
+            )}
             <button
               onClick={onSearchOpen}
               className={cn(
@@ -84,18 +95,16 @@ export const FilterPanel = memo(function FilterPanel({
       )}
 
       {/* Status Indicator */}
-      {!isSelectionMode && (
-        <div className="px-4 pb-2 flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-gray-500">조회:</span>
-          <span className="text-sm font-medium text-gray-700">{filter.status}</span>
-          {filter.cardHolder !== "전체" && (
-            <span className="text-sm text-gray-400">| {filter.cardHolder}</span>
-          )}
-          {filter.usageType !== "전체" && (
-            <span className="text-sm text-gray-400">| {filter.usageType}</span>
-          )}
-        </div>
-      )}
+      <div className="px-4 pb-2 flex items-center gap-2 flex-wrap">
+        <span className="text-sm text-gray-500">조회:</span>
+        <span className="text-sm font-medium text-gray-700">{filter.status}</span>
+        {filter.cardHolder !== "전체" && (
+          <span className="text-sm text-gray-400">| {filter.cardHolder}</span>
+        )}
+        {filter.usageType !== "전체" && (
+          <span className="text-sm text-gray-400">| {filter.usageType}</span>
+        )}
+      </div>
     </div>
   )
 })

@@ -87,6 +87,17 @@ export const DetailForm = memo(function DetailForm({
 
   const isAttachmentRequired = requiresAttachment && form.attachments.length === 0
 
+  const targetAccounts = ["회의비", "복리후생비-업무추진식대", "시내교통비"]
+  const showBudget = targetAccounts.includes(form.accountName) && !!form.wbsCode
+
+  let remainingBudget = 0
+  if (showBudget) {
+    const hash = (form.wbsCode + form.accountName).split("").reduce((a, b) => a + b.charCodeAt(0), 0)
+    const total = ((hash % 10) + 3) * 1000000
+    const used = ((hash % 7) + 1) * 350000
+    remainingBudget = total - used
+  }
+
   return (
     <div className="mx-4 mb-4 p-4 bg-white rounded-xl shadow-sm space-y-4">
       <h3 className="text-sm font-semibold text-gray-700">입력 정보</h3>
@@ -137,6 +148,11 @@ export const DetailForm = memo(function DetailForm({
           </span>
           {isEditable && <ChevronDown className="w-4 h-4 text-gray-400" />}
         </button>
+        {showBudget && (
+          <p className="text-[13px] font-medium text-blue-600 mt-1.5 ml-1">
+            상신 후 잔여예산: {remainingBudget.toLocaleString()}원
+          </p>
+        )}
       </div>
 
       {/* Usage Description */}

@@ -1,10 +1,100 @@
 "use client"
 
 import { memo, useState, useCallback, useRef, useEffect, type MouseEvent } from "react"
-import { MoreHorizontal, X, RefreshCw } from "lucide-react"
+import { MoreHorizontal, X, RefreshCw, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { CardTransaction, FilterState } from "@/lib/types"
 import { FilterPanel, SearchModal, FilterBottomSheet } from "./filter-panel"
 import { TransactionList } from "./transaction-list"
+import { wbsOptions } from "@/lib/mock-data"
+
+const BudgetBottomSheet = memo(function BudgetBottomSheet({ onClose }: { onClose: () => void }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const [selectedWbs, setSelectedWbs] = useState(wbsOptions[0]?.code || "")
+
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true))
+  }, [])
+
+  const handleClose = () => {
+    setIsVisible(false)
+    setTimeout(onClose, 300)
+  }
+
+  const targetAccounts = ["회의비", "복리후생비-업무추진식대", "시내교통비"]
+
+  return (
+    <>
+      <div
+        className={cn(
+          "absolute inset-0 z-40 bg-black/20 transition-opacity duration-300",
+          isVisible ? "opacity-100" : "opacity-0"
+        )}
+        onClick={handleClose}
+      />
+      <div
+        className={cn(
+          "absolute bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-lg transition-transform duration-300 ease-out flex flex-col max-h-[85vh]",
+          isVisible ? "translate-y-0" : "translate-y-full"
+        )}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+          <h2 className="text-lg font-semibold text-gray-900">WBS 예산 조회</h2>
+          <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
+        <div className="p-4 overflow-y-auto">
+          <div className="mb-5">
+            <label className="text-xs text-gray-500 mb-1.5 block">WBS 프로젝트 선택</label>
+            <div className="relative">
+              <select
+                value={selectedWbs}
+                onChange={(e) => setSelectedWbs(e.target.value)}
+                className="w-full pl-3 pr-8 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white font-medium text-gray-900"
+              >
+                {wbsOptions.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    [{opt.code}] {opt.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {targetAccounts.map((account) => {
+              const hash = (selectedWbs + account).split("").reduce((a, b) => a + b.charCodeAt(0), 0)
+              const total = ((hash % 10) + 3) * 1000000
+              const used = ((hash % 7) + 1) * 350000
+              const remaining = total - used
+              const percent = Math.min(100, Math.round((used / total) * 100))
+
+              return (
+                <div key={account} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-bold text-gray-900">{account}</span>
+                    <span className="text-xs font-medium px-2 py-1 bg-white rounded-md border border-gray-200 text-gray-600 shadow-sm">
+                      잔여 {remaining.toLocaleString()}원
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 mb-2 overflow-hidden">
+                    <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${percent}%` }}></div>
+                  </div>
+                  <div className="flex justify-between text-[11px] text-gray-500 font-medium">
+                    <span>사용 {used.toLocaleString()}</span>
+                    <span>총 {total.toLocaleString()}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+})
 
 type FilterChangeUpdater = FilterState | ((prev: FilterState) => FilterState)
 
@@ -48,6 +138,7 @@ export const ListScreen = memo(function ListScreen({
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false)
 
   // Pull-to-refresh states
   const [pullDistance, setPullDistance] = useState(0)
@@ -139,6 +230,7 @@ export const ListScreen = memo(function ListScreen({
         totalCount={filteredTransactions.length}
         onSelectAll={onSelectAll}
         onCancelSelection={onCancelSelection}
+        onBudgetOpen={() => setIsBudgetOpen(true)}
       />
 
       {/* Pull-to-refresh indicator */}
@@ -264,6 +356,11 @@ export const ListScreen = memo(function ListScreen({
           onClose={handleFilterClose}
           onAccountSelect={onFilterAccountSelect}
         />
+      )}
+
+      {/* Budget Bottom Sheet */}
+      {isBudgetOpen && (
+        <BudgetBottomSheet onClose={() => setIsBudgetOpen(false)} />
       )}
     </div>
   )
