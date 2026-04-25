@@ -278,6 +278,16 @@ export default function CorporateCardMobile() {
     })
   }, [])
 
+  const handleSelectAll = useCallback(() => {
+    if (selectedItems.length === filteredTransactions.length && filteredTransactions.length > 0) {
+      setSelectedItems([])
+      setIsSelectionMode(false)
+    } else {
+      setSelectedItems(filteredTransactions.map((t) => t.id))
+      setIsSelectionMode(true)
+    }
+  }, [filteredTransactions, selectedItems.length])
+
   const cancelSelection = useCallback(() => {
     setIsSelectionMode(false)
     setSelectedItems([])
@@ -752,6 +762,7 @@ export default function CorporateCardMobile() {
           onBatchSubmit={handleBatchSubmit}
           onBatchPersonalUse={handleBatchPersonalUse}
           onFilterAccountSelect={handleFilterAccountSelect}
+          onSelectAll={handleSelectAll}
         />
         
         {baseView === "detail" && selectedTransaction && (

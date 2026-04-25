@@ -61,7 +61,7 @@ export const TransactionItem = memo(function TransactionItem({
           )}
           style={{ touchAction: "pan-y", WebkitUserSelect: "none" }}
         >
-      <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3">
         {isSelectionMode && (
           <div className="pt-1 flex-shrink-0">
             <div

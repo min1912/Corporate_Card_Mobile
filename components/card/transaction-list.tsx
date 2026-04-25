@@ -6,6 +6,13 @@ import { TransactionItem } from "./transaction-item"
 import { cn } from "@/lib/utils"
 import type { CardTransaction } from "@/lib/types"
 
+const formatSectionDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-").map(Number)
+  const date = new Date(year, month - 1, day)
+  const days = ["일", "월", "화", "수", "목", "금", "토"]
+  return `${month}월 ${day}일 (${days[date.getDay()]})`
+}
+
 interface TransactionListProps {
   transactions: CardTransaction[]
   selectedItems: string[]
@@ -107,7 +114,7 @@ export const TransactionList = memo(function TransactionList({
         const isAllExiting = dailyTransactions.length > 0 && dailyTransactions.every(t => exitingIds.includes(t.id))
         
         return (
-          <div key={date}>
+          <div key={date} className="mb-5 last:mb-0">
             <div
               className={cn(
                 "grid transition-all duration-300 ease-in-out",
@@ -118,7 +125,7 @@ export const TransactionList = memo(function TransactionList({
               {/* 평소엔 sticky가 작동하도록 overflow-hidden을 애니메이션 중에만 적용합니다 */}
               <div className={cn("min-h-0", isAllExiting ? "overflow-hidden" : "")}>
                 <div className="sticky top-0 z-10 flex items-center px-4 py-2 bg-white/95 backdrop-blur-sm">
-                  <span className="text-xs font-medium text-gray-500 mr-3">{date}</span>
+                  <span className="text-xs font-bold text-gray-700 mr-3">{formatSectionDate(date)}</span>
                   <div className="flex-1 h-px bg-gray-100"></div>
                 </div>
               </div>

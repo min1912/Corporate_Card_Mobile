@@ -24,6 +24,7 @@ interface ListScreenProps {
   onBatchSubmit?: () => void
   onBatchPersonalUse?: () => void
   onFilterAccountSelect: (event: MouseEvent<HTMLButtonElement>) => void
+  onSelectAll: () => void
 }
 
 export const ListScreen = memo(function ListScreen({
@@ -42,6 +43,7 @@ export const ListScreen = memo(function ListScreen({
   onBatchSubmit,
   onBatchPersonalUse,
   onFilterAccountSelect,
+  onSelectAll,
 }: ListScreenProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -133,6 +135,10 @@ export const ListScreen = memo(function ListScreen({
         onSearchOpen={handleSearchOpen}
         onFilterOpen={handleFilterOpen}
         isSelectionMode={isSelectionMode}
+        selectedCount={selectedItems.length}
+        totalCount={filteredTransactions.length}
+        onSelectAll={onSelectAll}
+        onCancelSelection={onCancelSelection}
       />
 
       {/* Pull-to-refresh indicator */}
@@ -228,7 +234,7 @@ export const ListScreen = memo(function ListScreen({
                 onClick={onBatchEdit}
                 className="flex-1 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                일괄수정
+                일괄입력
               </button>
               <button
                 onClick={onBatchSubmit}

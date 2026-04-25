@@ -14,6 +14,10 @@ interface FilterPanelProps {
   onSearchOpen: () => void
   onFilterOpen: () => void
   isSelectionMode?: boolean
+  selectedCount?: number
+  totalCount?: number
+  onSelectAll?: () => void
+  onCancelSelection?: () => void
 }
 
 export const FilterPanel = memo(function FilterPanel({
@@ -23,58 +27,75 @@ export const FilterPanel = memo(function FilterPanel({
   onSearchOpen,
   onFilterOpen,
   isSelectionMode = false,
+  selectedCount = 0,
+  totalCount = 0,
+  onSelectAll,
+  onCancelSelection,
 }: FilterPanelProps) {
   return (
-    <div className="sticky top-0 z-10 bg-white border-b border-gray-100">
+    <div className={cn("sticky top-0 z-10 border-b border-gray-100 transition-colors", isSelectionMode ? "bg-blue-50/95 backdrop-blur-sm" : "bg-white")}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-lg font-semibold text-gray-900">법인카드 내역</h1>
-        <div className="flex items-center gap-1">
+      {isSelectionMode ? (
+        <div className="flex items-center justify-between px-4 py-2.5 h-[52px]">
+          <div className="flex items-center gap-2">
+            <button onClick={onCancelSelection} className="p-1 -ml-1 rounded-full hover:bg-blue-100 transition-colors" aria-label="선택 취소">
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+            <span className="text-base font-semibold text-blue-700">{selectedCount}건 선택</span>
+          </div>
           <button
-            onClick={onSearchOpen}
-            disabled={isSelectionMode}
-            className={cn(
-              "p-2 rounded-full transition-colors",
-              isSelectionMode
-                ? "text-gray-300 cursor-not-allowed"
-                : filter.searchQuery
-                ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                : "text-gray-500 hover:bg-gray-100"
-            )}
-            aria-label="검색"
+            onClick={onSelectAll}
+            className="text-sm font-medium text-blue-600 px-3 py-1.5 hover:bg-blue-100 rounded-lg transition-colors"
           >
-            <Search className="w-5 h-5" />
-          </button>
-          <button
-            onClick={onFilterOpen}
-            disabled={isSelectionMode}
-            className={cn(
-              "p-2 rounded-full transition-colors flex items-center gap-1",
-              isSelectionMode
-                ? "text-gray-300 cursor-not-allowed"
-                : isFilterActive
-                ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                : "text-gray-500 hover:bg-gray-100"
-            )}
-            aria-label="필터"
-          >
-            <Filter className="w-5 h-5" />
-            <ChevronDown className="w-3 h-3" />
+            {selectedCount === totalCount && totalCount > 0 ? "전체해제" : "전체선택"}
           </button>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between px-4 py-3 h-[52px]">
+          <h1 className="text-lg font-semibold text-gray-900">법인카드 내역</h1>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onSearchOpen}
+              className={cn(
+                "p-2 rounded-full transition-colors",
+                filter.searchQuery
+                  ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+              aria-label="검색"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onFilterOpen}
+              className={cn(
+                "p-2 rounded-full transition-colors flex items-center gap-1",
+                isFilterActive
+                  ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+              aria-label="필터"
+            >
+              <Filter className="w-5 h-5" />
+              <ChevronDown className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Status Indicator */}
-      <div className="px-4 pb-2 flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-gray-500">조회:</span>
-        <span className="text-sm font-medium text-gray-700">{filter.status}</span>
-        {filter.cardHolder !== "전체" && (
-          <span className="text-sm text-gray-400">| {filter.cardHolder}</span>
-        )}
-        {filter.usageType !== "전체" && (
-          <span className="text-sm text-gray-400">| {filter.usageType}</span>
-        )}
-      </div>
+      {!isSelectionMode && (
+        <div className="px-4 pb-2 flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-gray-500">조회:</span>
+          <span className="text-sm font-medium text-gray-700">{filter.status}</span>
+          {filter.cardHolder !== "전체" && (
+            <span className="text-sm text-gray-400">| {filter.cardHolder}</span>
+          )}
+          {filter.usageType !== "전체" && (
+            <span className="text-sm text-gray-400">| {filter.usageType}</span>
+          )}
+        </div>
+      )}
     </div>
   )
 })
